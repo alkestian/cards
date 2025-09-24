@@ -20,11 +20,29 @@ public class Blackjack {
 
     }
 
-    public void turn(Player[] players, Deck deck) {
+    public void turn(Player[] players, Deck deck, Scanner scanner) {
         Hand dealerHand = dealerHand(deck);
+        for (Player player : players) {
+            player.setHand(new BlackjackHand());
+            placePlayerBet(player, scanner);
+        }
     }
 
-    public Hand dealerHand(Deck deck) {
+    private void placePlayerBet(Player player, Scanner scanner) {
+        int bet;
+        do {
+            System.out.printf("Please enter your bet. You have %d chips to bet: \n", player.getTotalChips());
+            bet = scanner.nextInt();
+            while (bet <= 0 || bet > player.getTotalChips()) {
+                System.out.printf("Invalid bet. Please enter an amount between 1 and %d:\n", player.getTotalChips());
+                bet = scanner.nextInt();
+            }
+            System.out.printf("Are you happy to bet %d?\n", bet);
+        } while (!confirm(scanner));
+        player.getHand().placeBet(bet);
+    }
+
+    private Hand dealerHand(Deck deck) {
         Hand dealerHand = new BlackjackHand();
         dealerHand.addCard(deck.deal());
         dealerHand.addCard(deck.deal());
@@ -32,7 +50,7 @@ public class Blackjack {
         return dealerHand;
     }
 
-    public Player[] getPlayers(Scanner scanner){
+    private Player[] getPlayers(Scanner scanner){
         List<Player> players = new ArrayList<>();
         do {
             String name = chooseName(scanner);
@@ -61,7 +79,7 @@ public class Blackjack {
         return players.toArray(new Player[0]);
     }
 
-    public String chooseName(Scanner scanner){
+    private String chooseName(Scanner scanner){
         System.out.println("Please enter player name: ");
         String name = scanner.nextLine();
         while (name.isEmpty()) {
@@ -72,7 +90,7 @@ public class Blackjack {
         return name;
     }
 
-    public int chooseStartingChipsAmount(Scanner scanner){
+    private int chooseStartingChipsAmount(Scanner scanner){
         System.out.println("Please enter player starting chips: ");
         int amount = scanner.nextInt();
         while (amount <= 0) {

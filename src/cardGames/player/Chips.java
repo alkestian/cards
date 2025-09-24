@@ -1,32 +1,27 @@
 package cardGames.player;
 
 public class Chips {
-    private int chips;
+    private int total;
 
-    public Chips(int chips) {
-        this.chips = chips;
+    public Chips(int startingTotal) {
+        this.total = startingTotal;
     }
 
-    public boolean bet(int bet) {
-        if (bet > chips) {
+    public void add(int amount) {
+        if (amount > 0) {
+            this.total += amount;
+        }
+    }
+
+    public boolean remove(int amount) {
+        if (amount <= 0 || amount > this.total) {
             return false;
         }
-        if (bet <= 0) {
-            return false;
-        }
-        chips = chips - bet;
+        this.total -= amount;
         return true;
     }
 
-    public void payout(int bet) {
-        chips = chips + 2 * bet;
-    }
-
-    public void returnBet(int bet) {
-        chips = chips + bet;
-    }
-
-    public int size(){
-        return chips;
+    public int getTotal() {
+        return total;
     }
 }

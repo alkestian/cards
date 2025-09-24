@@ -23,9 +23,13 @@ public class Player {
         return this.hand;
     }
 
+    public int getTotalChips() {
+        return this.chips.getTotal();
+    }
+
     @Override
     public String toString(){
-        return String.format("%s has %d chips.\n", name, chips.size());
+        return String.format("%s has %d chips.\n", name, chips.getTotal());
     }
 
 }

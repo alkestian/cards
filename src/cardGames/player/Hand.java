@@ -7,6 +7,7 @@ import java.util.List;
 
 public abstract class Hand {
     protected final List<Card> cards;
+    protected int bet;
 
     public Hand() {
         this.cards = new ArrayList<>();
@@ -15,6 +16,11 @@ public abstract class Hand {
     public void addCard(Card card) {
         this.cards.add(card);
     }
+
+    public abstract void placeBet(int amount);
+
+    public abstract int getBet();
+
 
     public abstract Card showFirstCard();
 
