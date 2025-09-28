@@ -1,5 +1,6 @@
 package cardGames.blackjack;
 
+import cardGames.cards.Card;
 import cardGames.cards.Deck;
 import cardGames.player.Player;
 
@@ -33,25 +34,28 @@ public class Blackjack {
         BlackjackHand dealerHand = dealerHand(deck);
         int maxValidPlayerScore = 0;
         for (Player player : players) {
-            player.setHand(new BlackjackHand());
-            player.getHand().addCard(deck.deal());
-            player.getHand().addCard(deck.deal());
-            placePlayerBet(player, scanner);
-            doubleDown(player, scanner);
-            if (player.getHand().getValue() == 21) {
-                int blackjackWinnings = (int) (player.getHand().getBet() * 1.5);
-                System.out.printf("Blackjack! %s wins %d chips!\n", player.getName(), blackjackWinnings);
-                player.getChips().add(blackjackWinnings);
-                player.getHand().resetBet();
-                continue;
-            }
-            hitOrStand(player, scanner, deck);
-            if (player.getHand().getValue() > 21) {
-                System.out.println("Bust! You lose!");
-                player.getHand().resetBet();
-            }
-            if (player.getHand().getValue() > maxValidPlayerScore && player.getHand().getValue() <= 21) {
-                maxValidPlayerScore = player.getHand().getValue();
+            if (player.getChips().getTotal() > 0) {
+                System.out.printf("%s's turn!\n", player.getName());
+                player.setHand(new BlackjackHand());
+                player.getHand().addCard(deck.deal());
+                player.getHand().addCard(deck.deal());
+                placePlayerBet(player, scanner);
+                doubleDown(player, scanner);
+                if (player.getHand().getValue() == 21) {
+                    int blackjackWinnings = (int) (player.getHand().getBet() * 1.5);
+                    System.out.printf("Blackjack! %s wins %d chips!\n", player.getName(), blackjackWinnings);
+                    player.getChips().add(blackjackWinnings);
+                    player.getHand().resetBet();
+                    continue;
+                }
+                hitOrStand(player, scanner, deck);
+                if (player.getHand().getValue() > 21) {
+                    System.out.println("Bust! You lose!");
+                    player.getHand().resetBet();
+                }
+                if (player.getHand().getValue() > maxValidPlayerScore && player.getHand().getValue() <= 21) {
+                    maxValidPlayerScore = player.getHand().getValue();
+                }
             }
         }
         int dealerScore = dealerTurn(dealerHand, maxValidPlayerScore, deck);
@@ -199,7 +203,9 @@ public class Blackjack {
             System.out.printf("Your current hand: %s\nHit or stand?\n", player.getHand().toString());
             answer = scanner.nextLine();
             if (answer.equalsIgnoreCase("hit")) {
-                player.getHand().addCard(deck.deal());
+                Card newCard = deck.deal();
+                player.getHand().addCard(newCard);
+                System.out.printf("You are dealt a %s.\n", newCard.toString(), player.getHand().toString());
             } else if  (answer.equalsIgnoreCase("stand")) {
                 System.out.printf("Your final hand total: %d\n", player.getHand().getValue());
             } else {
