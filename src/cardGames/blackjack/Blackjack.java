@@ -1,8 +1,6 @@
 package cardGames.blackjack;
 
-import cardGames.cards.Card;
 import cardGames.cards.Deck;
-import cardGames.player.Hand;
 import cardGames.player.Player;
 
 import java.util.ArrayList;
@@ -10,7 +8,6 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Blackjack {
-
     public void blackjackGameLoop() {
         Deck deck = new Deck();
         Scanner scanner = new Scanner(System.in);
@@ -32,13 +29,14 @@ public class Blackjack {
     }
 
     public void turn(Player[] players, Deck deck, Scanner scanner) {
+        deck.shuffle();
         BlackjackHand dealerHand = dealerHand(deck);
         int maxValidPlayerScore = 0;
         for (Player player : players) {
             player.setHand(new BlackjackHand());
+            player.getHand().addCard(deck.deal());
+            player.getHand().addCard(deck.deal());
             placePlayerBet(player, scanner);
-            System.out.print("Your first card is: ");
-            System.out.println(player.getHand().showFirstCard().toString());
             doubleDown(player, scanner);
             if (player.getHand().getValue() == 21) {
                 int blackjackWinnings = (int) (player.getHand().getBet() * 1.5);
@@ -73,19 +71,36 @@ public class Blackjack {
                 System.out.printf("You win! %s wins %d chips!\n", player.getName(), player.getHand().getBet() * 2);
                 player.getChips().add(player.getHand().getBet() * 2);
                 player.getHand().resetBet();
+            } else {
+                System.out.printf("%s loses: %d to dealer's %d\n", player.getName(), player.getHand().getValue(), dealerScore);
             }
         }
 
+    }
+
+    public int chooseChips(Scanner scanner) {
+        while (true) {
+            try {
+                String line = scanner.nextLine();
+                int amount = Integer.parseInt(line);
+                if (amount > 0) {
+                    return amount;
+                }
+                System.out.println("Please enter a positive amount.");
+            } catch (NumberFormatException e) {
+                System.out.println("That's not a valid number. Please try again.");
+            }
+        }
     }
 
     private void placePlayerBet(Player player, Scanner scanner) {
         int bet;
         do {
             System.out.printf("Please enter your bet. You have %d chips to bet: \n", player.getTotalChips());
-            bet = scanner.nextInt();
-            while (bet <= 0 || bet > player.getTotalChips()) {
+            bet = chooseChips(scanner);
+            while (bet > player.getTotalChips()) {
                 System.out.printf("Invalid bet. Please enter an amount between 1 and %d:\n", player.getTotalChips());
-                bet = scanner.nextInt();
+                chooseChips(scanner);
             }
             System.out.printf("Are you happy to bet %d?\n", bet);
         } while (!confirm(scanner));
@@ -114,7 +129,7 @@ public class Blackjack {
         do {
             String name = chooseName(scanner);
             do {
-                System.out.printf("Are you happy with the name '%s'?", name);
+                System.out.printf("Are you happy with the name '%s'?\n", name);
                 boolean confirmation = confirm(scanner);
                 if (confirmation) {
                     break;
@@ -123,7 +138,7 @@ public class Blackjack {
             } while (true);
             int chips = chooseStartingChipsAmount(scanner);
             do {
-                System.out.printf("Start with %d chips?", chips);
+                System.out.printf("Start with %d chips?\n", chips);
                 boolean confirmation = confirm(scanner);
                 if (confirmation) {
                     break;
@@ -151,13 +166,7 @@ public class Blackjack {
 
     private int chooseStartingChipsAmount(Scanner scanner){
         System.out.println("Please enter player starting chips: ");
-        int amount = scanner.nextInt();
-        while (amount <= 0) {
-            System.out.println("Please enter a valid amount: ");
-            amount = scanner.nextInt();
-        }
-
-        return amount;
+        return chooseChips(scanner);
     }
 
     public boolean confirm(Scanner scanner){
@@ -173,7 +182,9 @@ public class Blackjack {
     }
 
     private void doubleDown(Player player, Scanner scanner) {
-        if (player.getHand().getBet() * 2 >= player.getTotalChips()) {
+        if (player.getHand().getBet() * 2 <= player.getTotalChips()) {
+            System.out.print("Your first card is: ");
+            System.out.println(player.getHand().showFirstCard());
             System.out.println("Would you like to double down?");
             if (confirm(scanner)) {
                 player.getChips().remove(player.getHand().getBet());
@@ -184,7 +195,7 @@ public class Blackjack {
 
     private void hitOrStand(Player player, Scanner scanner, Deck deck) {
         String answer = "";
-        while (!answer.equalsIgnoreCase("stand") || player.getHand().getValue() < 21) {
+        while (!answer.equalsIgnoreCase("stand") && player.getHand().getValue() < 21) {
             System.out.printf("Your current hand: %s\nHit or stand?\n", player.getHand().toString());
             answer = scanner.nextLine();
             if (answer.equalsIgnoreCase("hit")) {
