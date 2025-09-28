@@ -25,6 +25,10 @@ public class Blackjack {
         for (Player player : players) {
             player.setHand(new BlackjackHand());
             placePlayerBet(player, scanner);
+            System.out.println(player.getHand().showFirstCard().toString());
+            doubleDown(player, scanner);
+            hitOrStand(player, scanner, deck)
+            ;
         }
     }
 
@@ -110,6 +114,30 @@ public class Blackjack {
         } else {
             System.out.println("Please enter a valid input - either y/yes or n/no.");
             return confirm(scanner);
+        }
+    }
+
+    private void doubleDown(Player player, Scanner scanner) {
+        if (player.getHand().getBet() * 2 >= player.getTotalChips()) {
+            System.out.println("Would you like to double down?");
+            if (confirm(scanner)) {
+                player.getHand().doubleDown();
+            }
+        }
+    }
+
+    private void hitOrStand(Player player, Scanner scanner, Deck deck) {
+        String answer = "";
+        while (!answer.equalsIgnoreCase("stand") || player.getHand().getValue() < 21) {
+            System.out.printf("Your current hand: %s\nHit or stand?\n", player.getHand().toString());
+            answer = scanner.nextLine();
+            if (answer.equalsIgnoreCase("hit")) {
+                player.getHand().addCard(deck.deal());
+            } else if  (answer.equalsIgnoreCase("stand")) {
+                System.out.printf("Your final hand total: %d\n", player.getHand().getValue());
+            } else {
+                System.out.println("Please enter either 'hit' or 'stand' to continue.");
+            }
         }
     }
 }

@@ -21,8 +21,9 @@ public abstract class Hand {
 
     public abstract int getBet();
 
-
     public abstract Card showFirstCard();
+
+    public abstract void doubleDown();
 
     public abstract int getValue();
 
