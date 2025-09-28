@@ -15,21 +15,67 @@ public class Blackjack {
         Deck deck = new Deck();
         Scanner scanner = new Scanner(System.in);
         Player[] players = getPlayers(scanner);
-
+        boolean keepPlaying = true;
+        while (keepPlaying) {
+            turn(players, deck, scanner);
+            System.out.println("Keep playing?");
+            keepPlaying = confirm(scanner);
+            if (!keepPlaying) {
+                System.out.println("Final scores:");
+                for (Player player : players) {
+                    System.out.println(player.toString());
+                }
+            }
+        }
 
 
     }
 
     public void turn(Player[] players, Deck deck, Scanner scanner) {
-        Hand dealerHand = dealerHand(deck);
+        BlackjackHand dealerHand = dealerHand(deck);
+        int maxValidPlayerScore = 0;
         for (Player player : players) {
             player.setHand(new BlackjackHand());
             placePlayerBet(player, scanner);
+            System.out.print("Your first card is: ");
             System.out.println(player.getHand().showFirstCard().toString());
             doubleDown(player, scanner);
-            hitOrStand(player, scanner, deck)
-            ;
+            if (player.getHand().getValue() == 21) {
+                int blackjackWinnings = (int) (player.getHand().getBet() * 1.5);
+                System.out.printf("Blackjack! %s wins %d chips!\n", player.getName(), blackjackWinnings);
+                player.getChips().add(blackjackWinnings);
+                player.getHand().resetBet();
+                continue;
+            }
+            hitOrStand(player, scanner, deck);
+            if (player.getHand().getValue() > 21) {
+                System.out.println("Bust! You lose!");
+                player.getHand().resetBet();
+            }
+            if (player.getHand().getValue() > maxValidPlayerScore && player.getHand().getValue() <= 21) {
+                maxValidPlayerScore = player.getHand().getValue();
+            }
         }
+        int dealerScore = dealerTurn(dealerHand, maxValidPlayerScore, deck);
+        for (Player player : players) {
+            if (player.getHand().getBet() == 0) {
+                continue;
+            }
+            if (dealerScore > 21) {
+                System.out.printf("Dealer bust! %s wins %d chips!\n", player.getName(), player.getHand().getBet() * 2);
+                player.getChips().add(player.getHand().getBet() * 2);
+                player.getHand().resetBet();
+            } else if (player.getHand().getValue() == dealerScore) {
+                System.out.println("Draw! Bet is refunded.");
+                player.getChips().add(player.getHand().getBet());
+                player.getHand().resetBet();
+            } else if (player.getHand().getValue() > dealerScore) {
+                System.out.printf("You win! %s wins %d chips!\n", player.getName(), player.getHand().getBet() * 2);
+                player.getChips().add(player.getHand().getBet() * 2);
+                player.getHand().resetBet();
+            }
+        }
+
     }
 
     private void placePlayerBet(Player player, Scanner scanner) {
@@ -44,14 +90,23 @@ public class Blackjack {
             System.out.printf("Are you happy to bet %d?\n", bet);
         } while (!confirm(scanner));
         player.getHand().placeBet(bet);
+        player.getChips().remove(bet);
     }
 
-    private Hand dealerHand(Deck deck) {
-        Hand dealerHand = new BlackjackHand();
+    private BlackjackHand dealerHand(Deck deck) {
+        BlackjackHand dealerHand = new BlackjackHand();
         dealerHand.addCard(deck.deal());
         dealerHand.addCard(deck.deal());
         System.out.println("Dealer is showing: " + dealerHand.showFirstCard());
         return dealerHand;
+    }
+
+    private int dealerTurn(BlackjackHand dealerHand, int maxValidPlayerScore, Deck deck) {
+        while (dealerHand.getValue() <= maxValidPlayerScore && dealerHand.getValue() < 21) {
+            dealerHand.addCard(deck.deal());
+        }
+        System.out.printf("Dealer's hand: %s\n", dealerHand);
+        return dealerHand.getValue();
     }
 
     private Player[] getPlayers(Scanner scanner){
@@ -121,6 +176,7 @@ public class Blackjack {
         if (player.getHand().getBet() * 2 >= player.getTotalChips()) {
             System.out.println("Would you like to double down?");
             if (confirm(scanner)) {
+                player.getChips().remove(player.getHand().getBet());
                 player.getHand().doubleDown();
             }
         }

@@ -27,6 +27,14 @@ public class Player {
         return this.chips.getTotal();
     }
 
+    public Chips getChips() {
+        return this.chips;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
     @Override
     public String toString(){
         return String.format("%s has %d chips.\n", name, chips.getTotal());

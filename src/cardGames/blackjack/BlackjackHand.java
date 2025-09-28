@@ -31,6 +31,10 @@ public class BlackjackHand extends Hand {
         this.bet = amount;
     }
 
+    public void resetBet() {
+        this.bet = 0;
+    }
+
     public void doubleDown() {
         this.bet = this.bet * 2;
     }

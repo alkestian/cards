@@ -25,6 +25,8 @@ public abstract class Hand {
 
     public abstract void doubleDown();
 
+    public abstract void resetBet();
+
     public abstract int getValue();
 
     @Override
